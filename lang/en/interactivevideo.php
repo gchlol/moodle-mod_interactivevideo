@@ -205,6 +205,7 @@ $string['expand'] = 'Expand';
 $string['expected'] = 'Expected';
 $string['external'] = 'External';
 $string['fastforward200'] = 'Fast forward 0.2s (Ctrl/Cmd for 1s)';
+$string['fetchurlnotallowed'] = 'This URL is not a supported video provider address.';
 $string['file'] = 'File upload';
 $string['filters'] = 'Filter';
 $string['first'] = 'First';
