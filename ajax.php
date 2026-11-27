@@ -44,16 +44,13 @@ switch ($action) {
         echo interactivevideo_util::format_content($text, 1, $contextid);
         break;
     case 'get_from_url':
+        require_capability('mod/interactivevideo:view', $context);
         $url = required_param('url', PARAM_URL);
-        // Send get request to the URL.
-        $response = file_get_contents($url);
-        if (!$response) {
-            require_once($CFG->libdir . '/filelib.php');
-            $curl = new curl(['ignoresecurity' => true]);
-            $curl->setHeader('Content-Type: application/json');
-            $response = $curl->get($url);
-        }
-        echo $response;
+        // Only the metadata endpoints of the supported video providers may be fetched.
+        echo \mod_interactivevideo\local\remote_fetcher::fetch(
+            $url,
+            \mod_interactivevideo\local\remote_fetcher::get_provider_hosts()
+        );
         break;
     case 'update_videotime':
         require_capability('mod/interactivevideo:view', $context);
@@ -346,10 +343,12 @@ switch ($action) {
     case 'get_vdocipher':
         require_capability('mod/interactivevideo:view', $context);
         $key = get_config('mod_interactivevideo', 'auth_vdocipher');
-        $videoid = required_param('videoid', PARAM_TEXT);
-        $info = required_param('info', PARAM_TEXT);
+        // Constrain the id to the documented format so it cannot alter the request path.
+        $videoid = required_param('videoid', PARAM_ALPHANUMEXT);
+        $info = required_param('info', PARAM_ALPHA);
         require_once($CFG->libdir . '/filelib.php');
-        $curl = new curl(['ignoresecurity' => true]);
+        // The VdoCipher host is fixed, so the security helper must stay enabled.
+        $curl = new curl();
         $curl->setHeader('Accept: application/json');
         $curl->setHeader('Authorization: Apisecret ' . $key);
         $curl->setHeader('Content-Type: application/json');
